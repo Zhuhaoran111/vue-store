@@ -12,7 +12,7 @@
           :src="$route.path.includes(item.path) ? item.selected : item.active"
           alt=""
         />
-        <!-- <span>{{ item.title }}</span> -->
+        <!-- <span>{{ item.title }}</span> d点击不同的按钮文字也换颜色-->
         <span :class="$route.path.includes(item.path) ? 'active' : ''">{{
           item.title
         }}</span>
