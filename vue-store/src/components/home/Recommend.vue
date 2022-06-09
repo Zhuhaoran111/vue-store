@@ -1,6 +1,6 @@
 <template>
   <div class="recommend">
-    <Cart></Cart>
+    <Card></Card>
     <ul>
       <li v-for="(item, index) in recommendList" :key="index">
         <!-- 这是左边的图片 -->
@@ -22,43 +22,15 @@
 </template>
 
 <script>
-import Cart from "@/components/home/Cart.vue";
+import Card from "@/components/home/Card.vue";
 
 export default {
-  components: { Cart },
+  components: { Card },
+  props: {
+    recommendList: Array,
+  },
   data() {
-    return {
-      recommendList: [
-        {
-          id: 1,
-          name: "龙井乳茶",
-          content: "鲜美可口",
-          price: "68",
-          imgUrl: "./images/recommend.jpeg",
-        },
-        {
-          id: 1,
-          name: "龙井乳茶",
-          content: "鲜美可口",
-          price: "68",
-          imgUrl: "./images/recommend.jpeg",
-        },
-        {
-          id: 1,
-          name: "龙井乳茶",
-          content: "鲜美可口",
-          price: "68",
-          imgUrl: "./images/recommend.jpeg",
-        },
-        {
-          id: 1,
-          name: "龙井乳茶",
-          content: "鲜美可口",
-          price: "68",
-          imgUrl: "./images/recommend.jpeg",
-        },
-      ],
-    };
+    return {};
   },
 };
 </script>

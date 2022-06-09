@@ -36,6 +36,15 @@ const routes = [
             import('../views/My.vue')
     },
 
+    //搜索页面
+    {
+        path: '/search',
+        name: 'Search',
+        component: () =>
+            import('../views/Search.vue')
+    },
+
+
 
 ];
 

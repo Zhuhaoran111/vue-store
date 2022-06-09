@@ -3,6 +3,22 @@ import App from './App.vue'
 import router from './router'
 // import store from './store'
 
+//引入fun-tab插件
+// import { createApp } from 'vue'
+// import FunTab from 'fun-tab'
+
+// const app = createApp(App)
+// app.use(FunTab)
+
+// app.mount('#app')
+
+import LyTab from 'ly-tab'
+
+Vue.use(LyTab)
+
+
+
+
 //公共css文件
 import '@/assets/css/common.css'
 
@@ -12,9 +28,10 @@ import '@/assets/css/iconfont.css'
 //引入淘宝的无线适配文件
 import '@/assets/js/flexible.js'
 
-//引入ly-tab插件
-import LyTab from 'ly-tab';
-Vue.use(LyTab);
+
+
+
+
 
 Vue.config.productionTip = false
 

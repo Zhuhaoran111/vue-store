@@ -1,7 +1,7 @@
 <template>
   <header>
     <h1><img src="../../assets/image/logo.png" alt="" /></h1>
-    <div class="search">
+    <div class="search" @click="goSearch">
       <i class="iconfont icon-fangdajing"></i>
       <span>搜索你想要的.....</span>
     </div>
@@ -12,7 +12,14 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    goSearch() {
+      //点击事件进入到搜索页面
+      this.$router.push("/search");
+    },
+  },
+};
 </script>
 
 <style scoped>
