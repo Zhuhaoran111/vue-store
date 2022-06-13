@@ -40,12 +40,24 @@ const routes = [
     {
         path: '/search',
         name: 'Search',
+        children: [
+            //下面是搜多点击获得的页面
+            {
+                path: '/',
+                name: 'index',
+                component: () =>
+                    import('../views/search/Search-index.vue'),
+            },
+            {
+                path: 'list',
+                name: 'list',
+                component: () =>
+                    import('../views/search/Search-list.vue'),
+            }
+        ],
         component: () =>
-            import('../views/Search.vue')
+            import('../views/Search.vue'),
     },
-
-
-
 ];
 
 const router = new VueRouter({

@@ -5,7 +5,8 @@
     </Card>
     <ul>
       <li v-for="(item, index) in likeList" :key="index">
-        <h2><img :src="item.imgUrl" alt="" /></h2>
+        <!-- <h2><img :src="item.imgUrl" alt="" /></h2>   下面改成懒加载 -->
+        <h2><img v-lazy="item.imgUrl" alt="" /></h2>
         <h3>{{ item.name }}</h3>
         <div>
           <span>￥</span>
@@ -18,6 +19,8 @@
 
 <script>
 import Card from "@/components/home/Card.vue";
+//引入懒加载插件
+import { Lazyload } from "mint-ui";
 export default {
   name: "Like",
   props: {
@@ -71,5 +74,10 @@ export default {
 /* 给符号设置大小 */
 .like ul li > div span {
   font-size: 12px;
+}
+
+/* 懒加载样式 */
+.like img[lazy="loading"] {
+  background-color: #f7f7f7;
 }
 </style>

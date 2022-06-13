@@ -50,6 +50,8 @@ import Tabbar from "@/components/common/Tabbar.vue";
 import BetterScroll from "better-scroll";
 import axios from "axios";
 
+import http from "@/common/api/request.js";
+
 export default {
   name: "Home",
   data() {
@@ -83,11 +85,12 @@ export default {
   methods: {
     //请求数据的接口
     async getData() {
-      let res = await axios({
+      let res = await http.$axios({
         url: "/api/index_list/0/data01",
       });
-      this.Tabbar = res.data.data.topBar; //这个渲染不了
-      this.newData = res.data.data.data;
+
+      this.Tabbar = res.topBar; //这个渲染不了
+      this.newData = res.data;
 
       //nextTick等dom都加载完毕才执行这行代码
       this.$nextTick(() => {
@@ -100,17 +103,17 @@ export default {
 
     //点击请求
     async addData(index) {
-      let res = await axios({
+      let res = await http.$axios({
         url: "/api/index_list/" + index + "/data01",
       });
-      console.log(res.data);
-      console.log(res.data.data[0]);
+      // console.log(res.data);
+      // console.log(res.data.data[0]);
       // console.log(res.data.data.data);
-      if (res.data.data.constructor != Array) {
+      if (res.constructor != Array) {
         //这里判断如果res.data.data不是数组则判断还有一层，里面的data,如果是数组直接取数据即可
-        this.newData = res.data.data.data;
+        this.newData = res.data;
       } else {
-        this.newData = res.data.data;
+        this.newData = res;
       }
 
       //nextTick等dom都加载完毕才执行这行代码

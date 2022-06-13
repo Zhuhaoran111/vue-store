@@ -1,10 +1,318 @@
+
 var express = require('express');
 var router = express.Router();
+var connetcion = require('../db/sql')
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
+
+
+//分类的接口
+router.get('/api/goods/list', function (req, res, next) {
+  res.send({
+    code: 0,
+    data: [
+      //一级
+      {
+
+        id: 0,
+        name: '推荐',
+        data: [
+          //一级
+          {
+
+            id: 0,
+            name: '推荐',
+            list: [
+              //三级
+              {
+                id: 1,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 2,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 3,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 4,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 5,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 6,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              }
+
+            ]
+          },
+
+        ]
+      },
+
+      //第二个一级
+      {
+
+        id: 1,
+        name: '绿茶',
+        data: [
+          //一级
+          {
+
+            id: 0,
+            name: '绿茶',
+            list: [
+              //三级
+              {
+                id: 1,
+                name: '龙井',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 2,
+                name: '黄山毛峰',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 3,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 4,
+                name: '雀舌',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 5,
+                name: '碧螺春',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 6,
+                name: '安吉白茶',
+                imgUrl: './images/list1.jpeg'
+              }
+
+            ]
+          },
+
+        ]
+      },
+
+      //第二个一级
+      {
+
+        id: 2,
+        name: '乌龙',
+        data: [
+          //一级
+          {
+
+            id: 0,
+            name: '乌龙',
+            list: [
+              //三级
+              {
+                id: 1,
+                name: '龙井',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 2,
+                name: '黄山毛峰',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 3,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 4,
+                name: '雀舌',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 5,
+                name: '碧螺春',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 6,
+                name: '安吉白茶',
+                imgUrl: './images/list1.jpeg'
+              }
+
+            ]
+          },
+
+        ]
+      },
+      {
+
+        id: 3,
+        name: '红茶',
+        data: [
+          //一级
+          {
+
+            id: 0,
+            name: '红茶',
+            list: [
+              //三级
+              {
+                id: 1,
+                name: '龙井',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 2,
+                name: '黄山毛峰',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 3,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 4,
+                name: '雀舌',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 5,
+                name: '碧螺春',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 6,
+                name: '安吉白茶',
+                imgUrl: './images/list1.jpeg'
+              }
+
+            ]
+          },
+
+        ]
+      },
+      {
+
+        id: 4,
+        name: '毛峰',
+        data: [
+          //一级
+          {
+
+            id: 0,
+            name: '毛峰',
+            list: [
+              //三级
+              {
+                id: 1,
+                name: '龙井',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 2,
+                name: '黄山毛峰',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 3,
+                name: '铁观音',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 4,
+                name: '雀舌',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 5,
+                name: '碧螺春',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 6,
+                name: '安吉白茶',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 7,
+                name: '雀舌',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 8,
+                name: '碧螺春',
+                imgUrl: './images/list1.jpeg'
+              },
+              {
+                id: 9,
+                name: '安吉白茶',
+                imgUrl: './images/list1.jpeg'
+              }
+
+            ]
+          },
+
+        ]
+      },
+
+    ]
+
+  })
+})
+
+
+
+
+//查询搜索列表的数据
+router.get('/api/goods/shopList', function (req, res, next) {
+  //前端给后端的数据，发送的params参数为什么用query接收
+  //下面是ES6的解构赋值。需要去了解。
+  //Object.keys是把前面的key值取下来
+  //Object.values是把后面的值取下来
+  console.log(req.query);   //{ searchName: '红茶', price: 'asc' }
+  console.log(Object.keys(req.query)) //[ 'searchName', 'price' ]
+  console.log(Object.values(req.query))//[ '红茶', 'asc' ]
+
+  let [searchName, orderName] = Object.keys(req.query);
+  let [name, order] = Object.values(req.query);
+  console.log(name, orderName, order); //红茶 price asc
+
+
+
+
+  //模糊查询"%' + searchName + '%"'啥符号
+  connetcion.query('select * from goods_list where name like "%' + name + '%" order by ' + orderName + ' ' + order + ' ', function (error, results) {
+    /* err是错误信息，result是后台请求的数据 */
+    console.log(results)
+    res.send({
+      code: 0,
+      data: results,
+    })
+  })
+})
+
+
+
 
 //首页大红袍的数据
 router.get('/api/index_list/1/data01', function (req, res, next) {
@@ -171,6 +479,37 @@ router.get('/api/index_list/0/data01', function (req, res, next) {
               name: "茶具套装 红色芝麻毫 12件套",
               price: 399,
             },
+            {
+              id: 4,
+              imgUrl: "./images/like.jpeg",
+              name: "茶具套装 红色芝麻毫 12件套",
+              price: 399,
+            },
+            {
+              id: 5,
+              imgUrl: "./images/like.jpeg",
+              name: "茶具套装 红色芝麻毫 12件套",
+              price: 399,
+            },
+            {
+              id: 6,
+              imgUrl: "./images/like.jpeg",
+              name: "茶具套装 红色芝麻毫 12件套",
+              price: 399,
+            },
+            {
+              id: 7,
+              imgUrl: "./images/like2.jpeg",
+              name: "茶具套装 红色芝麻毫 12件套",
+              price: 399,
+            },
+            {
+              id: 8,
+              imgUrl: "./images/like3.jpeg",
+              name: "茶具套装 红色芝麻毫 12件套",
+              price: 399,
+            },
+
 
           ]
         },
