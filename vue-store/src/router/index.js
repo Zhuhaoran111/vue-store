@@ -58,6 +58,14 @@ const routes = [
         component: () =>
             import('../views/Search.vue'),
     },
+
+    //详情页面
+    {
+        path: '/detail',
+        name: 'detail',
+        component: () =>
+            import('../views/Detail.vue')
+    },
 ];
 
 const router = new VueRouter({

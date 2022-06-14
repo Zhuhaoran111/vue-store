@@ -97,6 +97,7 @@ export default {
         this.betterScroll = new BetterScroll(".wrapper", {
           movable: true,
           zoom: true,
+          click: true,
         });
       });
     },
@@ -116,11 +117,12 @@ export default {
         this.newData = res;
       }
 
-      //nextTick等dom都加载完毕才执行这行代码
+      //nextTick等dom都加载完毕才执行这行代码,滑动默认取消click事件
       this.$nextTick(() => {
         this.betterScroll1 = new BetterScroll(".wrapper", {
           movable: true,
           zoom: true,
+          click: true,
         });
       });
     },

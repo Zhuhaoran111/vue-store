@@ -16,11 +16,12 @@
       <div class="list-l" ref="left">
         <ul class="l-item">
           <li
-            class="active"
             v-for="(item, index) in leftData"
             :key="index"
+            :class="{ active: index == currentIndex }"
             @click="goScroll(index)"
           >
+            <!--   :class="{ active: index == currentIndex }"  绑定class属性 -->
             <!--   @click="goScroll(index)"  这里点击每项把index传过去 -->
             {{ item.name }}
           </li>
@@ -64,6 +65,7 @@ export default {
       rightData: [], //右侧数据
       rightBsscroll: "", //右侧滑动的数据
       allHeight: [], //承载右侧数据的高度值
+      scrollY: "", //右侧滚动距离
     };
   },
   components: {
@@ -98,7 +100,10 @@ export default {
         click: true, //betterScroll默认取消点击事件时false,这里要手动改变为true
       });
       //右侧滑动
-      this.rightBsscroll = new BetterScroll(this.$refs.right);
+      this.rightBsscroll = new BetterScroll(this.$refs.right, {
+        click: true,
+        probeType: 3, //默认为0建议修改成2和3
+      });
 
       //统计右侧板块的高度值，并且放入数组中
       let height = 0;
@@ -112,6 +117,12 @@ export default {
         this.allHeight.push(height);
       });
       console.log(this.allHeight); //把每个模块的高度及进行累计计算
+
+      //得到右侧滚动的值这里的pos就是滑动数值并且就取y的值是正值
+      this.rightBsscroll.on("scroll", (pos) => {
+        this.scrollY = Math.abs(pos.y);
+        // this.currentIndex;
+      });
     });
   },
 
@@ -119,6 +130,22 @@ export default {
     goScroll(index) {
       /* rightBsscroll.scrollTo(x,y,秒数) */
       this.rightBsscroll.scrollTo(0, -this.allHeight[index], 300);
+    },
+  },
+
+  computed: {
+    currentIndex() {
+      //findIndex(currentValue,index)  当前值和索引值
+      return this.allHeight.findIndex((item, index) => {
+        console.log(item);
+        //0, 257, 514, 771, 1028, 1378
+
+        return this.scrollY >= item && this.scrollY < this.allHeight[index + 1];
+        /*  假设scrollY滚动了400的距离
+              400>=0&&400<257   F
+              400>=257&&400<514 T
+        */
+      });
     },
   },
 };
