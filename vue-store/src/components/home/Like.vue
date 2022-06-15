@@ -4,7 +4,12 @@
       <span>猜你喜欢</span>
     </Card>
     <ul>
-      <li v-for="(item, index) in likeList" :key="index" @click="goDetail">
+      <li
+        v-for="(item, index) in likeList"
+        :key="index"
+        @click="goDetail(item.id)"
+      >
+        <!-- 这里给每个猜你喜欢模块传一个id点击的时候来确认不同的详情页 -->
         <!-- <h2><img :src="item.imgUrl" alt="" /></h2>   下面改成懒加载 -->
         <h2><img v-lazy="item.imgUrl" alt="" /></h2>
         <h3>{{ item.name }}</h3>
@@ -30,10 +35,19 @@ export default {
     return {};
   },
   methods: {
-    goDetail() {
+    goDetail(id) {
       //scrool默认取消click事件，所以要在Home.vue里面加click:true
       this.$router.push({
+        //1.query显示:通过query参数传值是显示的传参
         path: "/detail",
+        query: {
+          id,
+        },
+        /* 2.params隐示的传参 ，但是在那边接收不到，这里要声明name,path就可以不用了*/
+        // name: "detail",
+        // params: {
+        //   id,
+        // },
       });
     },
   },

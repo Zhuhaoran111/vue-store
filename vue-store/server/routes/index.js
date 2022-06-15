@@ -9,6 +9,22 @@ router.get('/', function (req, res, next) {
 });
 
 
+
+//点击猜你喜欢模块跳转到详情页的查询商品的id来更新详情页的数据
+router.get('/api/goods/id', function (req, res, next){
+  let id=req.query.id;
+  connetcion.query('select * from goods_list where id='+id+'',function(error,result){
+     if(error) throw error;
+     //这里为啥用res.json
+     res.json({
+      code:0,
+      data:result[0],
+     })
+  })
+
+})
+
+
 //分类的接口
 router.get('/api/goods/list', function (req, res, next) {
   res.send({
@@ -298,8 +314,6 @@ router.get('/api/goods/shopList', function (req, res, next) {
   console.log(name, orderName, order); //红茶 price asc
 
 
-
-
   //模糊查询"%' + searchName + '%"'啥符号
   connetcion.query('select * from goods_list where name like "%' + name + '%" order by ' + orderName + ' ' + order + ' ', function (error, results) {
     /* err是错误信息，result是后台请求的数据 */
@@ -456,34 +470,34 @@ router.get('/api/index_list/0/data01', function (req, res, next) {
 
           ]
         },
-        //猜你喜欢
+        //首页的猜你喜欢
         {
           id: 3,
           type: 'likeList',
           data: [
             {
               id: 1,
-              imgUrl: "./images/like.jpeg",
-              name: "茶具套装 红色芝麻毫 12件套",
-              price: 399,
+              imgUrl: "./images/goods1.jpg",
+              name: "赛事茶-第三届武夷山茶叶交易会暨仙店被杯-优质奖肉桂160g",
+              price: 238,
             },
             {
               id: 2,
-              imgUrl: "./images/like.jpeg",
-              name: "茶具套装 红色芝麻毫 12件套",
-              price: 399,
+              imgUrl: "./images/goods2.jpg",
+              name: "茶具套装-中式陶瓷茶叶罐 2色可选",
+              price: 28,
             },
             {
               id: 3,
-              imgUrl: "./images/like.jpeg",
-              name: "茶具套装 红色芝麻毫 12件套",
-              price: 399,
+              imgUrl: "./images/goods3.jpg",
+              name: "绿茶 远致龙井3号 150g 清爽甘醇",
+              price: 118,
             },
             {
               id: 4,
-              imgUrl: "./images/like.jpeg",
-              name: "茶具套装 红色芝麻毫 12件套",
-              price: 399,
+              imgUrl: "./images/goods4.jpg",
+              name: "明前春茶 绿茶 龙井破春系列80g罐装",
+              price:98,
             },
             {
               id: 5,

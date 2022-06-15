@@ -4,7 +4,9 @@
     <header>
       <!-- 两个标志区域 -->
       <div class="header-returns" v-show="isShow">
-        <i class="iconfont icon-fanhui"></i>
+        <div @click="goback">
+          <i class="iconfont icon-fanhui"></i>
+        </div>
         <i class="iconfont icon-kefu"></i>
       </div>
 
@@ -35,30 +37,22 @@
 
         <!-- 中间的文字区域-->
         <div class="goods_name">
-          <h1>2021年春茶 -白茶 珍稀白茶1号100g装</h1>
+          <h1>{{ goods.name }}</h1>
           <div>性价首选，性价首选，性价首选</div>
         </div>
         <div class="goods_price">
           <div class="oldPrice">
             <span>￥</span>
-            <b>288</b>
+            <b>{{ goods.price }}</b>
           </div>
           <div class="newPrice">
             <span>价格:</span>
-            <del>￥139</del>
+            <del>￥{{ goods.price }}</del>
           </div>
         </div>
         <div>
-          <img
-            style="width: 100%; height: 500px"
-            src="http://localhost:8080/images/goods-list1.jpeg"
-            alt=""
-          />
-          <img
-            style="width: 100%; height: 500px"
-            src="http://localhost:8080/images/goods-list1.jpeg"
-            alt=""
-          />
+          <img style="width: 100%; height: 500px" :src="goods.imgUrl" alt="" />
+          <img style="width: 100%; height: 500px" :src="goods.imgUrl" alt="" />
         </div>
       </div>
     </section>
@@ -74,11 +68,14 @@
 <script>
 import "swiper/dist/css/swiper.css";
 import { swiper, swiperSlide } from "vue-awesome-swiper";
+import http from "@/common/api/request.js";
 //引入插件
 import BetterScroll from "better-scroll";
 export default {
   data() {
     return {
+      id: 0,
+      goods: {},
       styleOption: {},
       BetterScroll: "",
       isShow: true,
@@ -92,17 +89,59 @@ export default {
       },
       swiperList: [
         {
-          imgUrl: "./images/goods-list1.jpeg",
+          imgUrl: "./images/goods1.jpg",
         },
         {
-          imgUrl: "./images/goods-list1.jpeg",
+          imgUrl: "./images/goods2.jpg",
         },
         {
-          imgUrl: "./images/goods-list1.jpeg",
+          imgUrl: "./images/goods3.jpg",
         },
       ],
     };
   },
+
+  created() {
+    this.id = this.$route.query.id; //先获取id的值存起来
+
+    console.log(this.$route); //用来接收路由的里面参数的信息
+    console.log(this.$route.query.id); //是通过路由的query进行传参的接收
+    // console.log(this.$route.params.id); //是通过路由的params进行传参的接收
+
+    this.getData();
+  },
+
+  //不走缓存的钩子
+  activated() {
+    //这个不走缓存,这里接收的id是存储值，this.$route.query.id是动态值
+    //先把点击的值存起来3 this.id=3,点击4时,4！=3发起请求，this.id=4
+    //点击3,
+    //这个只能是判断上一次的请求，隔一轮还是走请求
+    if (this.$route.query.id != this.id) {
+      this.getData(); //不相等会发送请求
+      this.id = this.$route.query.id;
+    }
+  },
+
+  methods: {
+    async getData() {
+      let id = this.$route.query.id;
+      let res = await http.$axios({
+        url: "/api/goods/id",
+        //用params传送后端用query接收
+        params: {
+          id,
+        },
+      });
+      this.goods = res;
+      console.log(res);
+    },
+
+    goback() {
+      this.$router.back(); //返回上一页
+    },
+  },
+
   mounted() {
     //nextTick等dom都加载完毕才执行这行代码,滑动默认取消click事件
     this.BetterScroll = new BetterScroll(this.$refs.wrapper, {
@@ -116,7 +155,7 @@ export default {
     this.BetterScroll.on("scroll", (pos) => {
       //设置头部弹出来有个渐变透明效果
       let posY = Math.abs(pos.y);
-      console.log(posY);
+      // console.log(posY);
       let opacity = posY / 180;
       opacity = opacity > 1 ? 1 : opacity;
 
