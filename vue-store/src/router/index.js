@@ -66,6 +66,57 @@ const routes = [
         component: () =>
             import('../views/Detail.vue')
     },
+        //登录页面
+    {
+            path: '/login',
+            name: 'login',
+            component: () =>
+                import('../views/login/Login.vue')
+    },
+    {
+        path: '/userLogin',
+        name: 'userLogin',
+        component: () =>
+            import('../views/login/UserLogin.vue')
+      },
+
+      {
+        path: '/Register',
+        name: 'Register',
+        component: () =>
+            import('../views/login/Register.vue')
+      },
+
+
+      //找回密码
+        
+    {
+        path: '/recovery',
+        name: 'Recovery',
+        children: [
+            //下面是找回密码获得的页面
+            {
+                path: '/',
+                name: 'index',
+                component: () =>
+                    import('../views/recovery/RecoveryIndex.vue'),
+            },
+            {
+                path: 'btn',
+                name: 'btn',
+                component: () =>
+                    import('../views/recovery/RecoveryBtn.vue'),
+            }
+        ],
+        component: () =>
+            import('../views/Search.vue'),
+    },
+
+
+
+
+
+
 ];
 
 const router = new VueRouter({
