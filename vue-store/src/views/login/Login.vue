@@ -37,6 +37,7 @@ import Tabbar from "@/components/common/Tabbar.vue";
 import Header from "./Header.vue";
 import { Toast } from "mint-ui";
 import http from "@/common/api/request.js";
+import { mapMutations } from "vuex"; //在需要传送的给别人的文件中引入A传给B就是给A引入
 
 export default {
   data() {
@@ -62,6 +63,8 @@ export default {
   },
 
   methods: {
+    ...mapMutations(["user_login"]),
+
     //登录
     login() {
       console.log(this.code == this.userCode);
@@ -80,7 +83,10 @@ export default {
           })
           .then((res) => {
             if (!res.success) return;
-            console.log(res);
+            //登录的信息和参数传过去存放到vuex中的mutatios中
+            this.user_login(res.data);
+            //点击登陆跳转到我的页面
+            this.$router.push("/my");
           });
       }
     },

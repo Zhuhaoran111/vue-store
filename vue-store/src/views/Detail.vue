@@ -59,7 +59,7 @@
 
     <!-- 底部区域 -->
     <footer>
-      <div class="add-cart">加入购物车</div>
+      <div class="add-cart" @click="addCart">加入购物车</div>
       <div>立即购买</div>
     </footer>
   </div>
@@ -125,6 +125,7 @@ export default {
 
   methods: {
     async getData() {
+      //this.$route.query.id知这是点击猜你喜欢页面传过来的id
       let id = this.$route.query.id;
       let res = await http.$axios({
         url: "/api/goods/id",
@@ -139,6 +140,24 @@ export default {
 
     goback() {
       this.$router.back(); //返回上一页
+    },
+    //点击加购物车请求
+    addCart() {
+      let id = this.$route.query.id;
+      http
+        .$axios({
+          url: "/api/addCart",
+          method: "POST",
+          data: {
+            goodsId: this.id,
+          },
+          headers: {
+            token: true,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+        });
     },
   },
 

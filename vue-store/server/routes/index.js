@@ -14,6 +14,17 @@ router.get('/', function (req, res, next) {
 });
 
 
+
+//
+router.post('/api/addCart',function(req,res,next){
+  res.send({
+    data:{
+       a:1,
+    }
+  })
+})
+
+
 //修改密码的接口
 router.post('/api/recovery',function(req,res,next){
 	let params = {

@@ -6,3 +6,11 @@
     </keep-alive>
   </div>
 </template>
+<script>
+export default {
+  //无论页面在哪都会执行？？？？？？？？？这里不熟
+  created() {
+    this.$store.commit("init_user");
+  },
+};
+</script>

@@ -3,7 +3,7 @@
     <Header>
       <!-- 如果自己有的就用自己的 -->
       <div></div>
-      <span>注册</span>
+      <span>登录</span>
     </Header>
     <section>
       <div class="login-tel">
@@ -33,7 +33,7 @@ import Tabbar from "@/components/common/Tabbar.vue";
 import Header from "./Header.vue";
 import { Toast } from "mint-ui";
 import http from "@/common/api/request.js";
-// import { mapMuations } from "vuex"; //在需要传送的给别人的文件中引入
+import { mapMutations } from "vuex"; //在需要传送的给别人的文件中引入A传给B就是给A引入
 
 export default {
   data() {
@@ -62,7 +62,8 @@ export default {
     Header,
   },
   methods: {
-    // ...mapMuations(["login"]),
+    //通过扩展运算符把user.js中mutations中的方法暴露在这里，这里可以调这个方法把参数传过去
+    ...mapMutations(["user_login"]),
 
     //跳转到找回密码界面
     goRecovery() {
@@ -101,6 +102,9 @@ export default {
           if (!res.success) return;
           //登陆成功，跳转页面
           console.log(res.data);
+
+          //登录的信息和参数传过去存放到vuex中的mutatios中
+          this.user_login(res.data);
 
           //点击登陆跳转到我的页面
           this.$router.push("/my");

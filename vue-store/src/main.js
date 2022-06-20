@@ -1,13 +1,17 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
+import store from './store'
 
 //全局引入mint-ui
 import MintUI from 'mint-ui';
 import 'mint-ui/lib/style.css';
 Vue.use(MintUI);
-// import store from './store'
 
+//全局引入vant框架
+import Vant from 'vant';
+import 'vant/lib/index.css'
+Vue.use(Vant)
 //引入fun-tab插件
 // import { createApp } from 'vue'
 // import FunTab from 'fun-tab'
@@ -42,6 +46,6 @@ Vue.config.productionTip = false
 
 new Vue({
   router,
-  // store,
+  store,
   render: h => h(App),
 }).$mount('#app')

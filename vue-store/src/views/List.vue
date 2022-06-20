@@ -1,6 +1,6 @@
 <template>
   <div class="list">
-    <header>
+    <header v-show="isShow">
       <div class="returns">
         <i class="iconfont icon-fanhui"></i>
       </div>
@@ -61,6 +61,7 @@ export default {
   name: "List",
   data() {
     return {
+      isShow: true,
       leftData: [], //左侧数据
       rightData: [], //右侧数据
       rightBsscroll: "", //右侧滑动的数据
@@ -103,6 +104,7 @@ export default {
       this.rightBsscroll = new BetterScroll(this.$refs.right, {
         click: true,
         probeType: 3, //默认为0建议修改成2和3
+        bounce: false, //取消回弹效果
       });
 
       //统计右侧板块的高度值，并且放入数组中
@@ -122,6 +124,12 @@ export default {
       this.rightBsscroll.on("scroll", (pos) => {
         this.scrollY = Math.abs(pos.y);
         // this.currentIndex;
+        //滑动记录>50则不显示
+        if (Math.abs(pos.y) >= 50) {
+          this.isShow = false;
+        } else {
+          this.isShow = true;
+        }
       });
     });
   },
