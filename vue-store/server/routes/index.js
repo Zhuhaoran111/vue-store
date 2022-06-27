@@ -197,7 +197,6 @@ router.post('/api/payment',function(req,res,next){
 //修改订单状态
 router.post('/api/submitOrder',function(req,res,next){
   //token
-  console.log('这里走了吗')
   let token = req.headers.token;
   let tokenObj = jwt.decode(token);
   //订单号
@@ -631,7 +630,6 @@ router.post('/api/addCart',function(req,res,next){
        
         //   res.send({
         //     data:{
-        //       code:200,
         //       success:true,
         //       msg:'添加成功'
         //     }

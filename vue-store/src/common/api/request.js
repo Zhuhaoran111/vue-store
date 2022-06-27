@@ -2,8 +2,8 @@
 //axios二次封装
 import { Indicator } from "mint-ui";
 import axios from 'axios';
-import store from '@/store/'
-import { router } from '@/router'
+import store from '@/store'
+import router from '@/router'
 
 export default {
     common: {
