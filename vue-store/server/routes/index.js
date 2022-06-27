@@ -6,6 +6,25 @@ var user=require('../db/userSql.js');
 
 //引入短信验证码的sdk
 var QcloudSms = require("qcloudsms_js");
+        //引入token包
+let jwt=require('jsonwebtoken');
+//引入axios
+const axios= require('axios')
+
+//引入支付宝配置文件
+const alipaySdk=require('../db/alipay.js')
+const AlipayFormData=require('alipay-sdk/lib/form').default;
+
+
+function getTimeToken( exp ){
+    
+  let getTime = parseInt(  new Date().getTime() / 1000 );
+  
+  if(  getTime - exp  >  60 ){
+      return true;
+  }
+  
+} 
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -15,14 +34,613 @@ router.get('/', function (req, res, next) {
 
 
 
-//
-router.post('/api/addCart',function(req,res,next){
-  res.send({
-    data:{
-       a:1,
-    }
+//支付状态
+router.post('/api/successPayment',function(req,res,next){
+    //token
+    let token = req.headers.token;
+    let tokenObj = jwt.decode(token);
+    //订单号
+    let out_trade_no = req.body.out_trade_no;
+    let trade_no = req.body.trade_no;
+    //支付宝配置
+    const formData = new AlipayFormData();
+    // 调用 setMethod 并传入 get，会返回可以跳转到支付页面的 url
+    formData.setMethod('get');
+       //支付时信息
+       formData.addField('bizContent', {
+        out_trade_no,
+        trade_no
+      });
+      //返回promise
+    const result = alipaySdk.exec(
+      'alipay.trade.query',
+      {},
+      { formData: formData },
+    );
+    //后端请求支付宝
+    result.then(resData=>{
+      axios({
+        method:'GET',
+        url:resData
+      }).then(data=>{
+        let responseCode = data.data.alipay_trade_query_response;
+        if(  responseCode.code == '10000' ){
+            switch(responseCode.trade_status){
+              case 'WAIT_BUYER_PAY':
+              res.send({
+                data:{
+                    code:0,
+                    data:{
+                        msg:'支付宝有交易记录，没付款'
+                    }
+                }
+            })
+            break;
+            case 'TRADE_CLOSED':
+              res.send({
+                  data:{
+                      code:1,
+                      data:{
+                          msg:'交易关闭'
+                      }
+                  }
+              })
+          break;
+          case 'TRADE_FINISHED':
+            connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+                //用户id
+                let uId = results[0].id;
+                connection.query(`select * from store_order where uId = ${uId} and order_id = ${out_trade_no}`,function(err,result){
+                    let id = result[0].id;
+                    //订单的状态修改掉2==》3
+                    connection.query(`update store_order set order_status = replace(order_status,'2','3') where id = ${id}`,function(){
+                        res.send({
+                            data:{
+                                code:2,
+                                data:{
+                                    msg:'交易完成'
+                                }
+                            }
+                        })
+                    })
+                })
+            })
+        break;
+
+        case 'TRADE_SUCCESS':
+                        connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+                            //用户id
+                            let uId = results[0].id;
+                            connection.query(`select * from store_order where uId = ${uId} and order_id = ${out_trade_no}`,function(err,result){
+                                //这是订单号的id
+                              let id = result[0].id;
+                                //订单的状态修改掉2==》3
+                                connection.query(`update store_order set order_status = replace(order_status,'2','3') where id = ${id}`,function(){
+                                    res.send({
+                                        data:{
+                                            code:2,
+                                            data:{
+                                                msg:'交易完成'
+                                            }
+                                        }
+                                    })
+                                })
+                            })
+                        })
+                   break;
+            }
+        }else if( responseCode.code == '40004' ){
+          res.send({
+              data:{
+                  code:4,
+                  msg:'交易不存在'
+              }
+          })
+      }
+      }).catch( err=>{
+        res.send({
+            data:{
+                code:500,
+                msg:'交易失败',
+                err
+            }
+        })
+     })
+    })
+
+})
+
+
+
+//发起支付
+router.post('/api/payment',function(req,res,next){
+  console.log('ZOULEMA ')
+ //订单号
+ let orderId = req.body.orderId;
+ //商品总价
+ let price = req.body.price;
+ //购买商品的名称
+ let name = req.body.name;
+ //开始对接支付宝API
+ const formData = new AlipayFormData();
+ // 调用 setMethod 并传入 get，会返回可以跳转到支付页面的 url
+ formData.setMethod('get');
+     //支付时信息
+ formData.addField('bizContent', {
+      outTradeNo: orderId,//订单号
+      productCode: 'FAST_INSTANT_TRADE_PAY',//写死的
+      totalAmount: price,//价格
+      subject: name,//商品名称
+    });
+
+  //支付成功或者失败跳转的链接
+  formData.addField('returnUrl', 'http://localhost:8080/payment');
+     //返回promise
+     const result = alipaySdk.exec(
+      'alipay.trade.page.pay',
+      {},
+      { formData: formData },
+    );
+       //对接支付宝成功，支付宝方返回的数据
+       result.then(resp=>{
+        res.send({
+            data:{
+                code:200,
+                success:true,
+                msg:'支付中',
+                paymentUrl : resp
+            }
+        })
+    })
+
+})
+
+//修改订单状态
+router.post('/api/submitOrder',function(req,res,next){
+  //token
+  console.log('这里走了吗')
+  let token = req.headers.token;
+  let tokenObj = jwt.decode(token);
+  //订单号
+  let orderId = req.body.orderId;
+  //购物车选中的商品id
+  let shopArr = req.body.shopArr;
+  //查询用户
+  connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+      //用户id
+      let uId = results[0].id;
+      connection.query(`select * from store_order where uId = ${uId} and order_id = ${orderId}`,function(err,result){
+          //订单的数据库id
+          let id = result[0].id;
+          //修改订单状态 1==>2
+          connection.query(`update store_order set order_status = replace(order_status,'1','2') where id = ${id}`,function(e,r){
+              //购物车数据删除
+              shopArr.forEach(v=>{
+                  connection.query(`delete from goods_cart where id = ${v}`,function(){
+                      
+                  })
+              })
+              res.send({
+                  data:{
+                      code:200,
+                      success:true
+                  }
+              })
+          })
+      })
+  })
+  
+})
+
+
+//生成一个订单
+router.post('/api/addOrder',function(req,res,next){
+         //token
+  let token = req.headers.token;
+  let tokenObj = jwt.decode(token);
+
+  //前端给后端的arr,就是选中要去结算的
+  let goodsArr=req.body.arr;
+
+  //生成订单的order_id 时间戳加6位的随机数
+  function setTimeDateFmt(s){
+    //补0
+         return s<10 ? '0'+ s : s
+  }
+  function randomNumber(){
+    const now=new Date();
+    let month=now.getMonth()+1;
+    let day=now.getDate();
+    let hour=now.getHours();
+    let minutes=now.getMinutes();
+    let seconds=now.getSeconds();
+
+    //个位数前面补0
+    month=setTimeDateFmt(month)
+    day=setTimeDateFmt(day)
+    hour=setTimeDateFmt(hour)
+    minutes=setTimeDateFmt(minutes)
+    seconds=setTimeDateFmt(seconds)
+
+
+  let orderCode=now.getFullYear().toString()+month.toString()+day+hour+minutes+seconds+(Math.round(Math.random()*100000)).toString();
+    return orderCode;
+}
+   /* 
+      未支付：1
+      待支付：2
+      支付成功：3
+      支付失败：4或者0
+  */
+ //商品列表名称
+    let goodsName=[];
+    //订单商品总金额
+    let goodsPrice=0;
+    //订单商品总数量
+    let goodsNum=0;
+    //订单号
+    let orderId = randomNumber();
+
+    goodsArr.forEach(v=>{
+      goodsName.push(v.goods_name);
+      goodsPrice+=v.goods_price*v.goods_num
+      goodsNum+=parseInt(v.goods_num);
+    })
+
+    //查询当前的用户
+    connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+          //查询是哪个用户id
+       
+          let uId = results[0].id;
+          connection.query(`insert into store_order (order_id,goods_name,goods_price,goods_num,order_status,uId) values ('${ orderId }','${goodsName}','${goodsPrice}','${goodsNum}','1',${uId})`,function(){
+              //查询当前的订单号
+            connection.query(`select * from store_order where uId = ${uId} and order_id='${orderId}'`,function(err,result){
+               res.send({
+                data:{
+                  success:true,
+                  code:200,
+                  data:result
+                }
+               })
+            })
+          })
+    })
+
+
+  
+})
+
+
+
+//删除收货地址
+router.post('/api/deleteAddress',function(req,res,next){
+  let id = req.body.id; //拿到id号
+  connection.query(`delete from address where id = ${id}`,function(error,results){
+      res.send({
+          data:{
+              code:200,
+              success:true,
+              msg:'删除成功'
+          }
+      })
   })
 })
+
+
+//修改收货地址
+router.post('/api/updateAddress',function(req,res,next){
+  //token
+  let token = req.headers.token;
+  let tokenObj = jwt.decode(token);
+  //拿到前端给后端传入的数据
+  let body = req.body;
+  let [id,name,tel,province,city,county,addressDetail,isDefault,areaCode] = [
+      body.id,
+      body.name,
+      body.tel,
+      body.province,
+      body.city,
+      body.county,
+      body.addressDetail,
+      body.isDefault,
+      body.areaCode
+  ];
+  //查询用户
+  connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+      //查询是哪个用户id
+      let uId = results[0].id;
+      //对应查询到0 或者 1 有没有默认收货地址
+      connection.query(`select * from address where uId = ${uId} and isDefault = ${isDefault}`,function(err,result){
+          if( result.length > 0 ){
+              let addressId = result[0].id;
+              connection.query(`update address isDefault = replace(isDefault,'1','0') where id = ${addressId}`,function(e,r){
+                  let updateSql = `update address set uId = ? , name = ? , tel = ? , province = ? , city = ? ,county = ? , addressDetail = ? , isDefault = ? , areaCode = ? where id = ${id}`;
+                  connection.query(updateSql,[uId,name,tel,province,city,county,addressDetail,isDefault,areaCode],function(errors,datas){
+                      res.send({
+                          data:{
+                              code:200,
+                              success:true,
+                              msg:'修改成功'
+                          }
+                      })
+                  })
+              })
+          }
+          else{
+              let updateSql = `update address set uId = ? , name = ? , tel = ? , province = ? , city = ? ,county = ? , addressDetail = ? , isDefault = ? , areaCode = ? where id = ${id}`;
+              connection.query(updateSql,[uId,name,tel,province,city,county,addressDetail,isDefault,areaCode],function(errors,datas){
+                  res.send({
+                      data:{
+                          code:200,
+                          success:true,
+                          msg:'修改成功'
+                      }
+                  })
+              })
+          }
+      })
+  })
+})
+
+
+
+//查询收货地址
+router.post('/api/selectAddress',function(req,res,next){
+  //token
+  let token = req.headers.token;
+  let tokenObj = jwt.decode(token);
+  
+  //查询用户
+  connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+      //用户id
+      let uId = results[0].id;
+      connection.query(`select * from address where uId = ${uId}`,function(err,result){
+          res.send({
+              data:{
+                  code:200,
+                  success:true,
+                  msg:'查询成功',
+                  data:result
+              }
+          })
+      })
+  })
+})
+
+
+
+//新增收货地址
+router.post('/api/addAddress',function(req,res,next){
+  //token
+  console.log(req.body)
+  let token = req.headers.token;
+  let tokenObj = jwt.decode(token);
+  //拿到前端给后端传入的数据
+  let body = req.body;
+  let [name,tel,province,city,county,addressDetail,isDefault,areaCode] = [
+      body.name,
+      body.tel,
+      body.province,
+      body.city,
+      body.county,
+      body.addressDetail,
+      body.isDefault,
+      body.areaCode
+    
+  ];
+  
+  //查询用户
+  connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+      //用户id
+      let uId = results[0].id;
+      //增加一条收货地址  ,这里不懂
+      if(isDefault!=1){
+        connection.query(`insert into address (uId,name,tel,province,city,county,addressDetail,isDefault,areaCode) values (${uId},"${name}","${tel}","${province}","${city}","${county}","${addressDetail}","${isDefault}","${areaCode}")`,function(err,result){
+          res.send({
+              data:{
+                  code:200,
+                  success:true,
+                  msg:'收货地址添加成功'
+              }
+          })
+      })
+      
+      }else{
+        connection.query(`select * from address where uId = ${uId} and isDefault = ${isDefault}`,function(err,result){
+          if( result.length > 0 ){
+              let addressId = result[0].id;
+              connection.query(`update address set isDefault = replace(isDefault,'1','0') where id = ${addressId}`,function(){
+                  connection.query(`insert into address (uId,name,tel,province,city,county,addressDetail,isDefault,areaCode) values (${uId},"${name}","${tel}","${province}","${city}","${county}","${addressDetail}","${isDefault}","${areaCode}")`,function(e,r){
+                      res.send({
+                          data:{
+                              code:200,
+                              success:true,
+                              msg:'收货地址添加成功'
+                          }
+                      })
+                  })
+              })
+          }
+          else{
+              connection.query(`insert into address (uId,name,tel,province,city,county,addressDetail,isDefault,areaCode) values (${uId},"${name}","${tel}","${province}","${city}","${county}","${addressDetail}","${isDefault}","${areaCode}")`,function(err,result){
+                  res.send({
+                      data:{
+                          code:200,
+                          success:true,
+                          msg:'收货地址添加成功'
+                      }
+                  })
+              })
+          }
+      })
+      
+      }
+
+    })
+})
+
+
+//修改购物车数量(这个忘记写了)
+router.post('/api/updateNum',function(req,res,next){
+    
+  let id = req.body.id;
+  let changeNum = req.body.num;
+  
+  connection.query(`select * from goods_cart where id = ${id}`,function(error,results){
+      //原来的数量
+      let num = results[0].goods_num;
+      connection.query(`update goods_cart set goods_num = replace(goods_num,${num},${changeNum}) where id = ${id}`,function(err,result){
+          res.send({
+              data:{
+                  code:200,
+                  success:true
+              }
+          })
+      })
+      
+  })
+  
+})
+
+
+//删除购物车数据
+router.post('/api/deleteCart',function(req,res,next){
+    
+  let arrId = req.body.arrId;
+  
+  for(let i=0;i<arrId.length;i++){
+      connection.query(`delete from goods_cart where id = ${arrId[i]}`,function(error,results){
+          res.send({
+              data:{
+                  code:200,
+                  success:true,
+                  msg:'删除成功'
+              }
+          })
+      })
+  }
+})
+
+//查询订单
+router.post('/api/selectOrder',function(req,res,next){
+  //接收前端给后端的订单号
+  let orderId = req.body.orderId;
+  connection.query(`select * from store_order where order_id='${orderId}'`,function(err,result){
+       res.send({
+          data:{
+               success:true,
+               code:200,
+               data:result
+          }
+       })
+  })
+})
+
+
+
+
+
+//查询当前购物车的数据
+router.post('/api/selectCart',function(req,res,next){
+  let token=req.headers.token;
+  let tokenObj=jwt.decode(token)
+
+  connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+     //上面这是查询用户是的id
+     let uId=results[0].id;
+     //这是查询加入购物车里面的数据
+     connection.query(`select * from goods_cart where uId=${uId}`,function(err,result){
+      res.send({
+          data:{
+            code:200,
+            success:true,
+            data:result,
+          }           
+      })
+     })
+
+  })
+})
+
+
+
+
+//添加购物车的接口
+router.post('/api/addCart',function(req,res,next){
+  //后端接胡搜前端的采纳数
+      let goodsId=req.body.goodsId;
+     let token=req.headers.token;
+     let tokenObj=jwt.decode(token);  
+
+        //如果执行，就证明token过期了
+    if(  getTimeToken(tokenObj.exp) ){
+      res.send({
+          data:{
+              code:1000
+          }
+      })
+  }
+   
+
+     console.log(tokenObj)
+     connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
+          //获取用户的id
+       let uId=results[0].id
+       //根据id取查询商品
+       connection.query(`select * from goods_list where id=${goodsId}`,function(err,result){
+        console.log(result[0])  //查询到点击id获取的商品信息
+        let goodsName=result[0].name;
+        let goodsPrice=result[0].price;
+        let goodsImgUrl=result[0].imgUrl;
+  //查询当前用户在之前是否添加过本商品
+  connection.query(`select * from goods_cart where uId=${uId} and goods_id=${goodsId}`,function(e,r){
+
+        //用户之前是添加过商品到购物车
+        if( r.length > 0 ){
+          let num = r[0].goods_num;
+          connection.query(`update goods_cart set goods_num = replace(goods_num,${num},${parseInt(num) + 1}) where id = ${r[0].id}`,function(e,datas){
+              res.send({
+                  data:{
+                      code:200,
+                      success:true,
+                      msg:'添加成功'
+                  }
+              })
+          })
+      }else{
+           //没有
+           connection.query(`insert into goods_cart (uId,goods_id,goods_name,goods_price,goods_num,goods_imgUrl) values ("${uId}","${goodsId}","${goodsName}","${goodsPrice}","1","${goodsImgUrl}")`,function(){
+            res.send({
+                data:{
+                    code:200,
+                    success:true,
+                    msg:'添加成功'
+                }
+            }) 
+         })
+      }
+  })
+})
+     })
+    })
+       
+
+
+
+
+        // connection.query(`insert into goods_cart(uId,goods_id,goods_name,goods_price,goods_num,goods_imgUrl) values  ("${uId}","${goodsId}","${goodsName}","${goodsPrice}","1","${goodsImgUrl}")`,function(e,r){
+       
+        //   res.send({
+        //     data:{
+        //       code:200,
+        //       success:true,
+        //       msg:'添加成功'
+        //     }
+        //   })
+        // })
+//        })
+//      })
+// })
 
 
 //修改密码的接口
@@ -224,21 +842,44 @@ router.post('/api/login',function(req,res,next){
       userPwd:req.body.userPwd,
     };
 
+    //
+    let userTel=params.userTel;
+    let userPwd=params.userPwd ||'66666';
+
+    //引入token包
+    let jwt=require('jsonwebtoken');
+    //用户信息
+      let payload={tel:userTel}
+    //口令
+    let secret='xiaoluxian'
+    //生成token
+    let token=jwt.sign(payload,secret,{
+        expiresIn:60
+    })
+
+
+
     //查询用户手机号是否存在,把手机号密码传入userSql.js中定义好的queryUserTel中
     connection.query(user.queryUserTel(params),function(error,results){
       //手机号存在
       if(results.length>0){
+        //记录的id
+        let id=results[0].id;
+
         //手机号存在
         connection.query(user.queryUserPwd(params),function(error,results){
           if(results.length>0){
-            //手机号密码都对
-            res.send({
-              code:200,
-              data:{
-                success:true,
-                msg:'登录成功',
-                data:results[0],
-              }
+
+            connection.query(`update user set token='${token}' where id=${id}`,function(){
+              //手机号密码都对
+              res.send({
+                code:200,
+                data:{
+                  success:true,
+                  msg:'登录成功',
+                  data:results[0],
+                }
+              })
             })
           }else{
             //密码不对

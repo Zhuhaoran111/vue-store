@@ -1,106 +1,207 @@
 <template>
   <div class="cart container">
     <header>
-      <div @click="returns">
-        <i class="iconfont icon-fanhui"></i>
+      <div>
+        <i class="iconfont icon-fanhui" @click="gobackhome"></i>
       </div>
       <span>购物车</span>
-      <span>编辑</span>
+      <span @click="isNavBar" v-text="isNavStatus ? '完成' : '编辑'"></span>
     </header>
-    <section>
+    <section v-if="list.length">
       <div class="cart-title">
-        <van-checkbox v-model="checked"></van-checkbox> <span>商品</span>
+        <!-- 下面这是全选按钮 -->
+        <van-checkbox @click="checkAllFn" :value="isCheckAll"></van-checkbox>
+        <span>商品</span>
       </div>
 
       <ul>
-        <li>
+        <li v-for="(item, index) in list" :key="index">
           <div class="radio1">
-            <van-checkbox v-model="checked"></van-checkbox>
+            <van-checkbox
+              @click="check_item(index)"
+              v-model="item.checked"
+            ></van-checkbox>
+            <!-- 这里的item.checked是中间内容部分的按钮 -->
           </div>
 
-          <h2><img src="../../public/images/like.jpeg" alt="" /></h2>
+          <h2><img :src="item.goods_imgUrl" alt="" /></h2>
 
           <div class="goods">
             <div class="goods_title">
-              <span>茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶</span>
-              <i class="iconfont icon-lajitong"></i>
+              <span>{{ item.goods_name }}</span>
+              <i
+                class="iconfont icon-lajitong"
+                @click="delGoodsFn(item.id)"
+              ></i>
             </div>
 
-            <div class="goods_price">￥128.00</div>
-            <van-stepper v-model="value" min="1" max="8" />
-          </div>
-        </li>
-        <li>
-          <div class="radio1">
-            <van-checkbox v-model="checked"></van-checkbox>
-          </div>
-
-          <h2><img src="../../public/images/like.jpeg" alt="" /></h2>
-
-          <div class="goods">
-            <div class="goods_title">
-              <span>茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶</span>
-              <i class="iconfont icon-lajitong"></i>
-            </div>
-
-            <div class="goods_price">￥128.00</div>
-            <van-stepper v-model="value" min="1" max="8" />
-          </div>
-        </li>
-        <li>
-          <div class="radio1">
-            <van-checkbox v-model="checked"></van-checkbox>
-          </div>
-
-          <h2><img src="../../public/images/like.jpeg" alt="" /></h2>
-
-          <div class="goods">
-            <div class="goods_title">
-              <span>茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶茶叶</span>
-              <i class="iconfont icon-lajitong"></i>
-            </div>
-
-            <div class="goods_price">￥128.00</div>
-            <van-stepper v-model="value" min="1" max="8" />
+            <div class="goods_price">￥{{ item.goods_price }}</div>
+            <van-stepper
+              @change="changeNum($event, item)"
+              v-model="item.goods_num"
+              integer
+            />
           </div>
         </li>
       </ul>
     </section>
 
+    <section v-else>
+      没有购物车数据
+      <router-link to="/home">去首页逛逛吧</router-link>
+    </section>
+
     <footer>
       <div class="radio">
-        <van-checkbox v-model="checked"></van-checkbox>
+        <van-checkbox @click="checkAllFn" :value="isCheckAll"></van-checkbox>
       </div>
-      <div class="total">
+      <div class="total" v-show="!isNavStatus">
         <div>
           共有
-          <span class="total-active">1</span>
+          <span class="total-active">{{ total.price }}</span>
           件商品
         </div>
         <div>
           <span>总计:</span>
-          <span class="total-active">￥128.00+0茶币</span>
+          <span class="total-active">￥{{ total.price.toFixed(2) }}+0茶币</span>
         </div>
       </div>
-      <div class="order">去结算</div>
+      <!-- 这里给每个删除添加id,然后传值给cart.js -->
+      <div class="order" v-if="isNavStatus" @click="delGoodsFn">删除</div>
+      <div class="order" v-else @click="goOrder">去结算</div>
     </footer>
   </div>
 </template>
 
 <script>
+import http from "@/common/api/request.js";
+import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
+import { Toast } from "mint-ui";
+
 export default {
   name: "Cart",
   data() {
     return {
-      value: 1,
-      checked: "true",
+      // value: 1,
+      isNavStatus: false,
+      checked: true,
     };
+  },
+  created() {
+    this.getData();
+  },
+  computed: {
+    ...mapState({
+      list: (state) => state.cart.list,
+      selectList: (state) => state.cart.selectList,
+    }),
+    ...mapGetters(["isCheckAll", "total"]),
+
+    goodsList() {
+      return this.selectList.map((id) => {
+        return this.list.find((v) => v.id == id);
+      });
+    },
   },
 
   methods: {
-    returns() {
-      console.log("111");
-      // this.$router.push("/my");
+    ...mapMutations(["cart_list", "check_item", "init_order"]),
+    ...mapActions(["checkAllFn", "delGoodsFn"]),
+    async getData() {
+      let res = await http.$axios({
+        url: "/api/selectCart",
+        method: "POST",
+        headers: {
+          token: true,
+        },
+      });
+      console.log(res);
+
+      //遍历给每个按钮加上checked来标志阿
+      res.data.forEach((v) => {
+        v["checked"] = true;
+      });
+      // console.log(res.data);
+
+      //这里打印数据
+      //这里调用方法这个方法是vuex中的
+      this.cart_list(res.data);
+    },
+
+    //点击编辑完成
+    isNavBar() {
+      this.isNavStatus = !this.isNavStatus;
+    },
+    gobackhome() {
+      this.$router.push("/my");
+    },
+
+    //修改数量，当前购物车的id以及修改后的数量传递给后端
+    //这个value就是修改后的数量，item.id是购物车商品的id
+    changeNum(value, item) {
+      console.log(value, item.id);
+      http
+        .$axios({
+          url: "/api/updateNum",
+          method: "post",
+          headers: {
+            token: true,
+          },
+          data: {
+            id: item.id,
+            num: value,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+        });
+    },
+    //点击结算取结算页
+    goOrder() {
+      if (!this.selectList.length) {
+        Toast("请选择商品");
+        return;
+      }
+
+      //就是把购物车选择的和自己打勾选择的作对比，id相同
+      let newList = [];
+      this.list.forEach((item) => {
+        this.selectList.filter((v) => {
+          if (v == item.id) {
+            newList.push(item);
+          }
+        });
+      });
+
+      /* 生成一个订单 */
+      http
+        .$axios({
+          url: "/api/addOrder",
+          method: "post",
+          headers: {
+            token: true,
+          },
+          data: {
+            arr: newList,
+          },
+        })
+        .then((res) => {
+          if (!res.success) return;
+
+          //存储订单
+          this.init_order(res.data);
+          console.log(res);
+
+          //提交进入订单的页面
+          this.$router.push({
+            path: "/order",
+            query: {
+              //selectList存的是id号码
+              detail: JSON.stringify(this.selectList),
+              goodsList: JSON.stringify(this.goodsList),
+            },
+          });
+        });
     },
   },
 };

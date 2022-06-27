@@ -42,11 +42,13 @@ export default {
         },
 
         //退出登录
-         loginOut(state){
+        
+        loginOut(state){
+            console.log('去除token')
             state.loginStatus=false;  //登陆进行把状态改为登陆true
             state.token=null;
             state.userInfo={};
-            localStorage.removeItem('tesUserInfo')  //移除本地存储信息
+            localStorage.removeItem('teauserInfo')  //移除本地存储信息
          }
 
      },

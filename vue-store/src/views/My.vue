@@ -12,7 +12,7 @@
     </header>
     <section>
       <ul>
-        <li>地址管理</li>
+        <li @click="gopath">地址管理</li>
         <li v-if="loginStatus" @click="loginOut">退出登录</li>
       </ul>
     </section>
@@ -53,6 +53,11 @@ export default {
 
     goLogin() {
       this.$router.push("/login");
+    },
+    //进入地址管理
+    gopath() {
+      console.log("aa");
+      this.$router.push("/path");
     },
   },
 };

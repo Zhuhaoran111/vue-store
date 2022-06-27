@@ -1,9 +1,13 @@
 <template>
   <div id="app">
     <!-- 所有的页面走缓存，点击相同的缓存，点击不同走请求 -->
+    <!--要缓存的路由 -->
     <keep-alive>
-      <router-view></router-view>
+      <router-view v-if="$route.meta.keepAlive"></router-view>
     </keep-alive>
+
+    <!-- 不缓存的路由 -->
+    <router-view v-if="!$route.meta.keepAlive"></router-view>
   </div>
 </template>
 <script>

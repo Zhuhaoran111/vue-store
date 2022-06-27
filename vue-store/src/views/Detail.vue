@@ -69,6 +69,7 @@
 import "swiper/dist/css/swiper.css";
 import { swiper, swiperSlide } from "vue-awesome-swiper";
 import http from "@/common/api/request.js";
+import { Toast } from "mint-ui";
 //引入插件
 import BetterScroll from "better-scroll";
 export default {
@@ -149,7 +150,7 @@ export default {
           url: "/api/addCart",
           method: "POST",
           data: {
-            goodsId: this.id,
+            goodsId: id,
           },
           headers: {
             token: true,
@@ -157,6 +158,9 @@ export default {
         })
         .then((res) => {
           console.log(res);
+          if (res.success) {
+            Toast("添加购物车成功");
+          }
         });
     },
   },

@@ -16,7 +16,6 @@ export default {
   },
 
   created() {
-    console.log("aaaaaaa");
     console.log(this.adList);
   },
 };

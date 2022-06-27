@@ -74,6 +74,7 @@ export default {
     Tabbar,
   },
   created() {
+    console.log("出错了吗");
     this.getData();
     console.log(this);
   },

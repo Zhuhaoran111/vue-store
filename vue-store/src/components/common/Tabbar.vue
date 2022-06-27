@@ -59,8 +59,8 @@ export default {
     switchTab(path) {
       //判断的是否点击的是同一个路由
       if (this.$route.path == path) return;
-      //下面是对应路由挑战的页面
-      this.$router.replace(path);
+      //下面是对应路由跳转的页面
+      this.$router.push(path);
     },
   },
 };
