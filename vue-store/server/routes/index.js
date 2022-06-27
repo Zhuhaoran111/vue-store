@@ -8,13 +8,12 @@ var user=require('../db/userSql.js');
 var QcloudSms = require("qcloudsms_js");
         //引入token包
 let jwt=require('jsonwebtoken');
-//引入axios
-const axios= require('axios')
 
 //引入支付宝配置文件
 const alipaySdk=require('../db/alipay.js')
 const AlipayFormData=require('alipay-sdk/lib/form').default;
-
+//引入axios
+const axios= require('axios')
 
 function getTimeToken( exp ){
     
@@ -573,7 +572,7 @@ router.post('/api/addCart',function(req,res,next){
      let tokenObj=jwt.decode(token);  
 
         //如果执行，就证明token过期了
-    if(  getTimeToken(tokenObj.exp) ){
+    if(getTimeToken(tokenObj.exp) ){
       res.send({
           data:{
               code:1000

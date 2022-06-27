@@ -161,6 +161,7 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 0.3733rem;
   background-color: #f5f5f5;
 }
 section div {

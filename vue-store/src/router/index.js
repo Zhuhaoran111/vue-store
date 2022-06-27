@@ -169,23 +169,27 @@ const routes = [
 
 ];
 
-
-
 const router = new VueRouter({
     mode: 'history',
     base: process.env.BASE_URL,
     routes,
-})
+});
 
 
 router.beforeEach((to,from,next)=>{
     
     let nextRoute = ['Payment','Cart','Path','Order','pathIndex','path-list'];
     //是否是登录中
-    let userInfo = JSON.parse( localStorage.getItem('teaUserInfo')  );
+    let userInfo = JSON.parse( localStorage.getItem('teauserInfo')  );
+    console.log('!!!!!!!!!')
+    console.log( localStorage.getItem('teauserInfo'))
+    console.log('!!!!!!!!!')
     
     //当前进入的页面，是不是需要验证哪些页面
     if(  nextRoute.indexOf( to.name ) >= 0  ){
+        console.log('---------')
+        console.log(userInfo)
+        console.log('---------')
         if( !userInfo ){
             router.push('/login');
         }
