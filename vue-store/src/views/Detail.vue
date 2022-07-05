@@ -148,7 +148,7 @@ export default {
       http
         .$axios({
           url: "/api/addCart",
-          method: "POST",
+          method: "post",
           data: {
             goodsId: id,
           },
@@ -158,6 +158,10 @@ export default {
         })
         .then((res) => {
           console.log(res);
+          console.log("这里返回数据了");
+          console.log("----------");
+          console.log(res);
+          console.log("----------");
           if (res.success) {
             Toast("添加购物车成功");
           }

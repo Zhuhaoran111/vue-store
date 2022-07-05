@@ -27,7 +27,7 @@ export default {
             options.headers.token=store.state.user.token;
 
             if(!options.headers.token){
-                // debugger
+            
                 router.push('/login');
                
             }

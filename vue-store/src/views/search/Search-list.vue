@@ -4,6 +4,7 @@
       <Header></Header>
       <ul>
         <li
+          class="arrow"
           v-for="(item, index) in searchList.data"
           :key="index"
           @click="changeTab(index)"
@@ -160,6 +161,9 @@ export default {
 </script>
 
 <style scoped>
+.arrow {
+  display: flex;
+}
 .search-list {
   flex-direction: column;
   width: 100vw;
@@ -243,5 +247,5 @@ section ul li .price div:first-child span {
 .activie {
   color: red;
 }
-</style>>
-
+</style>
+>

@@ -17,8 +17,7 @@ const axios= require('axios')
 
 function getTimeToken( exp ){
     
-  let getTime = parseInt(  new Date().getTime() / 1000 );
-  
+  let getTime = parseInt(new Date().getTime() / 1000);
   if(  getTime - exp  >  60 ){
       return true;
   }
@@ -566,20 +565,21 @@ router.post('/api/selectCart',function(req,res,next){
 //添加购物车的接口
 router.post('/api/addCart',function(req,res,next){
   //后端接胡搜前端的采纳数
+  console.log('这里走通了吗')
       let goodsId=req.body.goodsId;
      let token=req.headers.token;
      let tokenObj=jwt.decode(token);  
 
         //如果执行，就证明token过期了
-    if(getTimeToken(tokenObj.exp) ){
-      res.send({
-          data:{
-              code:1000
-          }
-      })
-  }
-   
-
+  //   if(getTimeToken(tokenObj.exp) ){
+  //     console.log('token过期了')
+  //     res.send({
+  //         data:{
+  //             code:1000
+  //         }
+  //     })
+  // }
+    
      console.log(tokenObj)
      connection.query(`select * from user where tel = ${tokenObj.tel}`,function(error,results){
           //获取用户的id
@@ -595,6 +595,7 @@ router.post('/api/addCart',function(req,res,next){
 
         //用户之前是添加过商品到购物车
         if( r.length > 0 ){
+          console.log('第一个判断走了吗')
           let num = r[0].goods_num;
           connection.query(`update goods_cart set goods_num = replace(goods_num,${num},${parseInt(num) + 1}) where id = ${r[0].id}`,function(e,datas){
               res.send({
@@ -607,6 +608,7 @@ router.post('/api/addCart',function(req,res,next){
           })
       }else{
            //没有
+           console.log('第二个判断走了吗')
            connection.query(`insert into goods_cart (uId,goods_id,goods_name,goods_price,goods_num,goods_imgUrl) values ("${uId}","${goodsId}","${goodsName}","${goodsPrice}","1","${goodsImgUrl}")`,function(){
             res.send({
                 data:{
@@ -617,6 +619,7 @@ router.post('/api/addCart',function(req,res,next){
             }) 
          })
       }
+      
   })
 })
      })
@@ -626,18 +629,6 @@ router.post('/api/addCart',function(req,res,next){
 
 
 
-        // connection.query(`insert into goods_cart(uId,goods_id,goods_name,goods_price,goods_num,goods_imgUrl) values  ("${uId}","${goodsId}","${goodsName}","${goodsPrice}","1","${goodsImgUrl}")`,function(e,r){
-       
-        //   res.send({
-        //     data:{
-        //       success:true,
-        //       msg:'添加成功'
-        //     }
-        //   })
-        // })
-//        })
-//      })
-// })
 
 
 //修改密码的接口

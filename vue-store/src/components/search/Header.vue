@@ -123,5 +123,6 @@ header {
 }
 .search-main form input {
   width: 100%;
+  font-size: 18px;
 }
 </style>

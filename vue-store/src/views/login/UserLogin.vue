@@ -132,6 +132,7 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 0.32rem;
   background-color: #f5f5f5;
 }
 section div {

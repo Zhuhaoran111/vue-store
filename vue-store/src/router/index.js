@@ -2,9 +2,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 
-
-Vue.use(VueRouter);
-
 const originalPush = VueRouter.prototype.push
 const originalReplace = VueRouter.prototype.replace
 // push
@@ -17,6 +14,10 @@ VueRouter.prototype.replace = function push (location, onResolve, onReject) {
   if (onResolve || onReject) return originalReplace.call(this, location, onResolve, onReject)
   return originalReplace.call(this, location).catch(err => err)
 }
+
+Vue.use(VueRouter);
+
+
 
 
 const routes = [
@@ -191,6 +192,7 @@ router.beforeEach((to,from,next)=>{
         console.log(userInfo)
         console.log('---------')
         if( !userInfo ){
+           
             router.push('/login');
         }
     }
